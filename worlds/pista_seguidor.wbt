@@ -1,0 +1,450 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+
+WorldInfo {
+  info [
+    "Simulacao de Seguidor de Linha no Webots"
+    "Trabalho de robotica com pista 2x2m e carrinho 4 rodas normal"
+    "Aluno: Lorrayne Argenton dos Santos - RA: 23144"
+  ]
+  title "Seguidor de Linha - Arena 2x2m"
+  basicTimeStep 16
+  coordinateSystem "ENU"
+  contactProperties [
+    ContactProperties {
+      material1 "roda_traseira"
+      material2 "default"
+      coulombFriction [ 1.0 ]
+    }
+    ContactProperties {
+      material1 "roda_dianteira"
+      material2 "default"
+      coulombFriction [ 0.05 ]
+    }
+  ]
+}
+
+Viewpoint {
+  orientation 0.28 0.22 -0.93 2.15
+  position 0.2 -1.4 1.8
+  follow "SEGUIDOR_LINHA"
+}
+
+TexturedBackground {
+}
+
+TexturedBackgroundLight {
+}
+
+# Arena 2x2 metros sem repeticao de textura (floorTileSize 2 2)
+RectangleArena {
+  floorSize 2 2
+  floorTileSize 2 2
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/pista_circuito.png"
+      ]
+    }
+    roughness 0.5
+    metalness 0
+  }
+}
+
+# Carrinho Robótico com 4 rodas normais de carro (rolagem perfeita e suave, sem empinar)
+Robot {
+  translation 0 0.61 0.025
+  rotation 0 0 1 0
+  children [
+    # Chassi principal do carro com folga do chao
+    Transform {
+      translation 0 0 0.015
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.1 0.45 0.85
+            roughness 0.3
+            metalness 0.1
+          }
+          geometry Box {
+            size 0.16 0.085 0.015
+          }
+        }
+      ]
+    }
+
+    # Placa superior / bateria
+    Transform {
+      translation -0.01 0 0.026
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.15 0.15 0.15
+            roughness 0.6
+          }
+          geometry Box {
+            size 0.06 0.05 0.012
+          }
+        }
+      ]
+    }
+
+    # Barra frontal de suporte dos sensores
+    Transform {
+      translation 0.08 0 0.005
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.1 0.1 0.1
+            roughness 0.5
+          }
+          geometry Box {
+            size 0.01 0.055 0.006
+          }
+        }
+      ]
+    }
+
+    # Sensor Infravermelho Esquerdo (DSE)
+    DistanceSensor {
+      translation 0.08 0.018 -0.013
+      rotation 0 1 0 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0.1 0.1
+            roughness 0.3
+          }
+          geometry Cylinder {
+            height 0.004
+            radius 0.003
+          }
+        }
+      ]
+      name "DSE"
+      lookupTable [
+        0 1000 0
+        0.02 300 0
+      ]
+      type "infra-red"
+    }
+
+    # Sensor Infravermelho Direito (DSD)
+    DistanceSensor {
+      translation 0.08 -0.018 -0.013
+      rotation 0 1 0 1.5708
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.1 0.7 0.1
+            roughness 0.3
+          }
+          geometry Cylinder {
+            height 0.004
+            radius 0.003
+          }
+        }
+      ]
+      name "DSD"
+      lookupTable [
+        0 1000 0
+        0.02 300 0
+      ]
+      type "infra-red"
+    }
+
+    # =========================================================================
+    # 4 RODAS NORMAIS DE CARRO (ROTAÇÃO CORRETA EM TORNO DO EIXO Y)
+    # =========================================================================
+
+    # 1. RODA TRASEIRA ESQUERDA (motorE)
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 1 0
+        anchor -0.045 0.055 0
+      }
+      device [
+        RotationalMotor {
+          name "motorE"
+          maxVelocity 10
+          maxTorque 0.5
+        }
+      ]
+      endPoint Solid {
+        translation -0.045 0.055 0
+        children [
+          Transform {
+            rotation 1 0 0 1.5708
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.15 0.15 0.15
+                  roughness 0.8
+                }
+                geometry Cylinder {
+                  height 0.016
+                  radius 0.025
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.85 0.85 0.85
+                  roughness 0.3
+                  metalness 0.5
+                }
+                geometry Cylinder {
+                  height 0.017
+                  radius 0.015
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.2 0.2 0.2
+                  roughness 0.5
+                }
+                geometry Cylinder {
+                  height 0.018
+                  radius 0.005
+                }
+              }
+            ]
+          }
+        ]
+        name "roda_traseira_esq"
+        contactMaterial "roda_traseira"
+        boundingObject Transform {
+          rotation 1 0 0 1.5708
+          children [
+            Cylinder {
+              height 0.016
+              radius 0.025
+            }
+          ]
+        }
+        physics Physics {
+          density -1
+          mass 0.04
+        }
+      }
+    }
+
+    # 2. RODA TRASEIRA DIREITA (motorD)
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 1 0
+        anchor -0.045 -0.055 0
+      }
+      device [
+        RotationalMotor {
+          name "motorD"
+          maxVelocity 10
+          maxTorque 0.5
+        }
+      ]
+      endPoint Solid {
+        translation -0.045 -0.055 0
+        children [
+          Transform {
+            rotation 1 0 0 1.5708
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.15 0.15 0.15
+                  roughness 0.8
+                }
+                geometry Cylinder {
+                  height 0.016
+                  radius 0.025
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.85 0.85 0.85
+                  roughness 0.3
+                  metalness 0.5
+                }
+                geometry Cylinder {
+                  height 0.017
+                  radius 0.015
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.2 0.2 0.2
+                  roughness 0.5
+                }
+                geometry Cylinder {
+                  height 0.018
+                  radius 0.005
+                }
+              }
+            ]
+          }
+        ]
+        name "roda_traseira_dir"
+        contactMaterial "roda_traseira"
+        boundingObject Transform {
+          rotation 1 0 0 1.5708
+          children [
+            Cylinder {
+              height 0.016
+              radius 0.025
+            }
+          ]
+        }
+        physics Physics {
+          density -1
+          mass 0.04
+        }
+      }
+    }
+
+    # 3. RODA DIANTEIRA ESQUERDA (Apoio livre com rolagem)
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 1 0
+        anchor 0.045 0.055 0
+      }
+      endPoint Solid {
+        translation 0.045 0.055 0
+        children [
+          Transform {
+            rotation 1 0 0 1.5708
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.15 0.15 0.15
+                  roughness 0.8
+                }
+                geometry Cylinder {
+                  height 0.016
+                  radius 0.025
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.85 0.85 0.85
+                  roughness 0.3
+                  metalness 0.5
+                }
+                geometry Cylinder {
+                  height 0.017
+                  radius 0.015
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.2 0.2 0.2
+                  roughness 0.5
+                }
+                geometry Cylinder {
+                  height 0.018
+                  radius 0.005
+                }
+              }
+            ]
+          }
+        ]
+        name "roda_dianteira_esq"
+        contactMaterial "roda_dianteira"
+        boundingObject Transform {
+          rotation 1 0 0 1.5708
+          children [
+            Cylinder {
+              height 0.016
+              radius 0.025
+            }
+          ]
+        }
+        physics Physics {
+          density -1
+          mass 0.04
+        }
+      }
+    }
+
+    # 4. RODA DIANTEIRA DIREITA (Apoio livre com rolagem)
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 1 0
+        anchor 0.045 -0.055 0
+      }
+      endPoint Solid {
+        translation 0.045 -0.055 0
+        children [
+          Transform {
+            rotation 1 0 0 1.5708
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.15 0.15 0.15
+                  roughness 0.8
+                }
+                geometry Cylinder {
+                  height 0.016
+                  radius 0.025
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.85 0.85 0.85
+                  roughness 0.3
+                  metalness 0.5
+                }
+                geometry Cylinder {
+                  height 0.017
+                  radius 0.015
+                }
+              }
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.2 0.2 0.2
+                  roughness 0.5
+                }
+                geometry Cylinder {
+                  height 0.018
+                  radius 0.005
+                }
+              }
+            ]
+          }
+        ]
+        name "roda_dianteira_dir"
+        contactMaterial "roda_dianteira"
+        boundingObject Transform {
+          rotation 1 0 0 1.5708
+          children [
+            Cylinder {
+              height 0.016
+              radius 0.025
+            }
+          ]
+        }
+        physics Physics {
+          density -1
+          mass 0.04
+        }
+      }
+    }
+  ]
+  name "SEGUIDOR_LINHA"
+  boundingObject Transform {
+    translation 0 0 0.015
+    children [
+      Box {
+        size 0.15 0.08 0.012
+      }
+    ]
+  }
+  physics Physics {
+    density -1
+    mass 0.35
+    centerOfMass [
+      0 0 0.005
+    ]
+  }
+  controller "seguidor_linha"
+}
